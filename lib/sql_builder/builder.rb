@@ -12,31 +12,19 @@ module SQLBuilder
 
     [
       :select,
+      :where,
       :order_by,
       :group_by,
-    ].each do |nm|
-      define_method nm, ->(*arguments) {
-        StatementBuilder.new(self, @db_type).tap do |builder|
-          builder.instance_variable_set("@#{nm}", arguments)
-        end
-      }
-    end
-
-    [
-      :where,
       :having,
       :limit,
       :offset,
-    ].each do |nm|
-      define_method nm, ->(argument) {
-        instance_variable_set("@#{nm}", argument)
-        self
+    ].each {|nm|
+      define_method nm, ->(*arguments) {
+        StatementBuilder.new(self, @db_type).tap {|builder|
+          builder.public_send(nm, *arguments)
+        }
       }
-    end
-
-    def for_update
-      @for_update = true
-    end
+    }
 
     private
 
