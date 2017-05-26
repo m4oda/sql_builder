@@ -38,7 +38,7 @@ module SQLBuilder
     end
 
     def call(name, as: nil)
-      @fields[name] ||= TableField.new(self, name).tap do |field|
+      @fields[name] ||= TableField.new(self, name, as: as).tap do |field|
         self.singleton_class.instance_eval {
           define_method name, -> { field }
         } unless respond_to?(name)
@@ -48,6 +48,10 @@ module SQLBuilder
     def method_missing(name, *args, &block)
       if args.empty? and not block_given?
         self.(name)
+      elsif args.size == 1
+        anm = args.first.is_a?(Hash) && args.first[:as]
+        anm ||= args.first
+        self.(name, as: anm)
       else
         super
       end

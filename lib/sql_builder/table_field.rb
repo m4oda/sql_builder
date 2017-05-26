@@ -4,9 +4,10 @@ module SQLBuilder
 
     attr_reader :db_type, :table, :name
 
-    def initialize(table, name)
+    def initialize(table, name, as: nil)
       @table = table
       @name = name
+      @alias = as
       @db_type = table.db_type
     end
 
@@ -34,6 +35,8 @@ module SQLBuilder
     def to_s
       if @name.to_s == '*'
         "#@table.*"
+      elsif @alias
+        "%s.%s AS %s" % [@table, quote_identifier(@name), quote_identifier(@alias)]
       else
         "%s.%s" % [@table, quote_identifier(@name)]
       end
